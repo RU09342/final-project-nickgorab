@@ -1,5 +1,5 @@
 /*
- *            battCheck.c
+ *            main.c
  *
  *   Created on:  November 12, 2017
  *  Last Edited:  November 12, 2017
@@ -9,18 +9,52 @@
 
 #include "system.h"
 
-#define MAX_OUT
 
-int rKp,            // Roll proportional constant
-    rKi,            // Roll integral constant
-    rKd,            // Roll derivative constant
-    pKp,            // Pitch proportional constant
-    pKi,            // Pitch integral constant
-    pKd,            // Pitch derivative constant
-    hKp,            // Height proportional constant
-    hKi,            // Height integral constant
-    hKd;            // Height derivative constant
-int battStat = 0;   // 
+
+/************************\
+*                        *
+*    Code Definitions    *
+*                        *
+\************************/
+
+#define MAX_OUT 100         // Maximum PWM output
+#define MIN_OUT 2           // Minimum PWM output
+#define dt      0.000125    // Sampling time of ~100Hz
+int   roll,                 // Roll value
+      pitch,                // Pitch Value
+      height,               // Height value
+      setRoll,              // Set roll value
+      setPitch,             // Set pitch value
+      setHeight,            // Set height value
+      rKp,                  // Roll proportional constant
+      rKi,                  // Roll integral constant
+      rKd,                  // Roll derivative constant
+      pKp,                  // Pitch proportional constant
+      pKi,                  // Pitch integral constant
+      pKd,                  // Pitch derivative constant
+      hKp,                  // Height proportional constant
+      hKi,                  // Height integral constant
+      hKd;                  // Height derivative constant
+float rP_error,             // Roll proportional error
+      rI_error,             // Roll integral error
+      rD_error,             // Roll derivative error
+      pP_error,             // Pitch proportional error
+      pI_error,             // Pitch integral error 
+      pD_error,             // Pitch derivative error
+      hP_error,             // Height proportonal error
+      hI_error,             // Height integral error
+      hD_error,             // Height derivative error
+      rPastError,           // Roll past error for integral control
+      pPastError,           // Pitch past error for integral control
+      hPastError,           // Height past error for integral control
+      rOutput,              // Roll PID output
+      pOutput,              // Pitch PID output
+      hOutput,              // Height PID output
+      p1pwm,                // Pitch control 1 PWM
+      p2pwm,                // Pitch control 2 PWM
+      r1pwm,                // Roll control 1 PWM
+      r2pwm;                // Roll control 2 PWM
+int   battStat = 0;         // Critical battery flag
 
 
 
@@ -32,13 +66,13 @@ int battStat = 0;   //
 
 void battCheck(void){
 
-    ADC12CTL0 |= ADC12ENC       // Enables ADC
-              |  ADC12SC;       // Takes a reading
+    ADC12CTL0 |= ADC12ENC   // Enables ADC
+              |  ADC12SC;   // Takes a reading
 
-    if(ADC12MEM0 < 3105) {      // If battry voltage < 2.5 V
-        battStat = 1;           // Raises low batt flag
+    if(ADC12MEM0 < 3723) {  // If battry voltage < 3.0 V
+        battStat = 1;       // Raises low batt flag
     } else {
-        battStat = 0;           // Continue normal operation
+        battStat = 0;       // Continue normal operation
     }
 
     switch(battStat){
@@ -60,29 +94,76 @@ void battCheck(void){
 *                       *
 \***********************/
 
-void pwmControl(int setPoint){
-    adcMem = ADC12MEM0;                     // Sets variable equal to ADC value for debugging
+void pidControl(int setPoint){
 
-    if(tempChange){                         // If the ADC value needs to be adjusted
-       P_error = adcMem - (setPoint+27.3);  // Sets temp to value of 1 less than it actually is
-    } else {                                // If the value does not need to be adjusted
-        P_error = adcMem - setPoint;        // Sets temp to actual value
+    getHeight();                            // Updates current height value
+    getRoll();                              // Updates current roll value
+    getPitch();                             // Updates current pitch value
+
+    rP_error = roll   - setRoll;            // Calculates roll proportional error 
+    pP_error = pitch  - setPitch;           // Calculates pitch proportional error 
+    hP_error = height - setHeight;          // Calculates height proportional error
+
+    rD_error = (rP_error - rpastError)/dt;  // Calculates roll derivative error
+    pD_error = (pP_error - ppastError)/dt;  // Calculates pitch derivative error
+    hD_error = (hP_error - hpastError)/dt;  // Calculates height derivative error
+
+    rI_Error = rI_Error + (rP_error*dt);    // Calculates sum value for integral control
+    pI_Error = pI_Error + (pP_error*dt);    // Calculates sum value for integral control
+    hI_Error = hI_Error + (hP_error*dt);    // Calculates sum value for integral control
+
+    rpastError = rP_error;                  // Updates past error for
+    ppastError = pP_error;                  // Updates past error for
+    hpastError = hP_error;                  // Updates past error for
+
+    hOutput = (hKp*hP_error)                // Adds proportional error
+            + (hKd*hD_error)                // Adds derivative error
+            + (hKi*hI_Error);               // Adds integral error
+
+    pOutput = (pKp*pP_error)                // Adds proportional error
+            + (pKd*pD_error)                // Adds derivative error
+            + (pKi*pI_Error);               // Adds integral error
+
+    iOutput = (iKp*iP_error)                // Adds proportional error
+            + (iKd*iD_error)                // Adds derivative error
+            + (iKi*iI_Error);               // Adds integral error
+
+    if(hOutput > MAX_OUT){                   // If height output is greater than max output
+       hOutput = MAX_OUT;                   // Clamps output to max value
+    } else if(hOutput < MIN_OUT){            // If height output is less than minimum output
+        hOutput = MIN_OUT;                   // Clamps output to minimum value
+    }    
+
+    if(pOutput > MAX_OUT){                   // If pitch output is greater than max output
+        pOutput = MAX_OUT;                   // Clamps output to max value
+    } else if(pOutput < MIN_OUT){            // If pitch output is less than minimum output
+        pOutput = MIN_OUT;                   // Clamps output to minimum value
+    }       
+
+    if(rOutput > MAX_OUT){                   // If roll output is greater than max output
+        rOutput = MAX_OUT;                   // Clamps output to max value
+    } else if(rOutput < MIN_OUT){            // If roll output is less than minimum output
+        rOutput = MIN_OUT;                   // Clamps output to minimum value
     }
 
-    D_error = (P_error - pastError)/dt;     // Calculated derivative error
-    I_Error = I_Error + (P_error*dt);       // Calculated sum value for integral control
-    pastError = P_error;                    // Updates past error for
-    output  = (Kp*P_error)                  // Adds proportional error
-         // + (Kd*D_error)                  // Adds derivative error
-            + (Ki*I_Error);                 // Adds integral error
-        
-    if(output > MAX_OUT){                   // If output is greater than max output
-        output = MAX_OUT;                   // Clamps output to max value
-    } else if(output < MIN_OUT){            // If output is less than minimum output
-        output = MIN_OUT;                   // Clamps output to minimum value
-    }       
-        
-    TA0CCR1 = output;                       // Established PWM value based off of PI Controller
+    if(rOutput > 0){                         // If there is a positive roll
+      r1pwm = hOutput + (rOutput/2);         // Adds half the PWM value to the height control
+      r2pwm = hOutput - (rOutput/2);         // Subtracts half PWM value from the height control
+    } else {
+      r1pwm = hOutput + (rOutput/2);         // Subtracts half PWM value from the height control
+      r2pwm = hOutput - (rOutput/2);         // Adds half the PWM value form the height control
+    }
+
+    if(pOutput > 0){                         // If there is a positive pitch
+      p1pwm = hOutput + (pOutput/2);         // Adds half the PWM value to the height control
+      p2pwm = hOutput - (pOutput/2);         // Subtracts half PWM value from the height control
+    } else {                                 
+      p1pwm = hOutput - (pOutput/2);         // Subtracts half PWM value from the height control
+      p2pwm = hOutput + (pOutput/2);         // Adds half the PWM value form the height control
+    }        
+
+    
+
 }
 
 
@@ -101,7 +182,8 @@ void main(void){
     timerInit();
 
     while(1){
-        battCheck();
+        battCheck();            // Continuously checks battery status
+        pidControl();           // Controls the motors through PID
     }
 }
 
