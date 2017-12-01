@@ -22,6 +22,9 @@ void adcInit();
 void ledInit();
 void timerInit();
 void i2cInit();
-
+void dcoInit();
+void vcnl4200Init();
+void lsm6dslInit();
+void uartInit();
 
 #endif /* INITIALIZER_H_ */
