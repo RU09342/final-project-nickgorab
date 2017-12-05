@@ -1,0 +1,99 @@
+\documentclass{hitec}
+
+\usepackage{booktabs,array,dcolumn}
+\usepackage[endianness=big]{bytefield}
+
+
+\newcolumntype{d}{D{.}{.}{2.3}}
+\newcolumntype{C}{>{\centering}p}
+
+
+\author{Nick Gorab}
+\title{CodQuaptor}
+
+\begin{document}
+	\maketitle
+	
+	\section{Abstract}
+	\section{Features}
+	\section{Bill Of Materials}
+	\section{Design}
+	\subsection{Software}
+	\subsubsection{Battery Health Monitoring}
+	Lithium Polymer batteries can sustain cell damage when they are exposed to a voltage lower than what they are rated for. To account for this, the micro controller will constantly be checking the output voltage of the battery to make sure that it remains within operating condition. This is done by connecting an ADC pin to the positive terminal of the battery.\\
+	\\
+	\begin{table}[htp]
+		\caption{Battery Health States}    
+		\centering
+		\begin{center}
+			\begin{tabular}{p{1.25in}dp{1.25in}}
+				\toprule
+				\multicolumn{1}{C{1.25in}}{State} & \multicolumn{1}{C{1in}}{Voltage (V)} & \multicolumn{1}{C{1.25in}}{Behavior}\\
+				\midrule
+				Optimal & > 3.0 & Normal Operation\\
+				Low & 3.0 - 2.7 & Low Battery Flag\\
+				Critical & < 2.7 & Effective Shutdown\\
+				\bottomrule
+			\end{tabular}
+		\end{center}
+		\label{BattStates}
+	\end{table}
+	As seen in Table \ref{BattStates} the low battery flag is raised then the ADC reads 3V. With the flag raised, the motors will decrease speed, bringing the device slowly to the ground. There is another critical battery level of 2.5 volts that will effectively turn off all functions when reached. This is done by putting the device into Low-Power mode, turning off the propellers, and disabling the LEDs.  
+	\subsubsection{Indication Lighting}
+	Indication lighting is used in order to give notice of when the battery reaches a critical level. When operating in the nominal range, the lights will remain constantly on. When the low battery threshold is reached the lights will begin to flash, indicating the user the battery is low. When approaching the critical voltage level, the lights will blink rapidly preceding the shutdown of the device. 
+	\subsubsection{$I^{2}C$ Communication}
+	In order to gather data pertaining to the position of the device, a distance sensor and accelerometer were used in conjunction to determine attitude. Both of these devices use $I^{2}C$ Communication to send and recieve data. 
+	\paragraph{VCNL4200}
+	\paragraph{LSM6DSL}
+	\subsubsection{PID Control}
+	\subsubsection{On-The-Fly Calibration}
+	In order to calibrate the PID controller without recompiling after every test, an On-The-Fly PID calibration function was implemented. UART is used in order to communicate the constant for the PID Controllers. The signal architecture can be found below in Figure \ref{fig: PIDarchitecture}.
+	
+	\begin{figure}[ht]
+		\begin{bytefield}[bitwidth = \linewidth / 72]{72}
+			\bitheader[endianness = big]{0, 7, 15, 23, 31, 39, 47, 55, 63, 71}\\
+			\bitbox{8}{hKd}
+			\bitbox{8}{hKi}
+			\bitbox{8}{hKp}
+			\bitbox{8}{pKd}
+			\bitbox{8}{pKi}
+			\bitbox{8}{pKp}
+			\bitbox{8}{rKd}
+			\bitbox{8}{rKi}
+			\bitbox{8}{rKp}
+				\end{bytefield}
+		\caption{Format for calibrating PID Controllers.}
+		\label{fig: PIDarchitecture}
+	\end{figure}
+
+9 Bytes of data are used in order to update all 3 constants for the three PID controllers. 
+
+	\subsection{Hardware}
+	\subsubsection{Voltage Regulation}
+The LiPo battery source operates at an optimal 3.7V, meaning that it needs to be regulated before it is introduced to the MSP430FR5994 micro controller. Table \ref{OpVoltage}, found below, shows the recommended operating voltages of the major components used in the design. \\
+
+\begin{table}[htp]
+\caption{Recommended Operating Voltages}    
+\centering
+\begin{center}
+	\begin{tabular}{p{1.25in}dd}
+		\toprule
+		\multicolumn{1}{C{1.25in}}{Component} & \multicolumn{1}{C{1in}}{MIN (V)} & \multicolumn{1}{C{1.25in}}{MAX (V)}\\
+		\midrule
+		MSP430FR5994 & 1.8 & 3.6\\
+		VCNL4200 & 2.5 & 3.6\\
+		LSM6DSL & 1.71 & 3.6\\
+		\bottomrule
+	\end{tabular}
+\end{center}
+\label{OpVoltage}
+\end{table}
+
+The recommended maximum value is below the operating point of the battery, so the voltage needs to be stepped down for use. \\
+This was originally planned to be done through a voltage regulator, however the dropoff voltages are too large to provide an adequate and stable output. 
+
+
+	\subsubsection{High-Side Switching PWM Control}
+	\subsubsection{PCB Design Considerations}
+	\subsubsection{title}
+\end{document}

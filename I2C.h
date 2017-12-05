@@ -13,10 +13,10 @@
 
 #include <msp430.h>
 
-void i2cSingleWrite(char address, char data);                   // Writes single byte of data
-void i2cSingleRead (char address, char *data);                  // Reads single byte of data
-void i2cMultipleWrite(char address, char *data, int size);      // Writes multiple bytes of data
-void i2cMultipleRead (char address, char *data, int size);      // Reads multiple bytes of data
+void i2cSingleWrite(char address, char TX_Data);                   // Writes single byte of data
+void i2cSingleRead(char address, char *RX_Data);                  // Reads single byte of data
+void i2cMultipleWrite(char address, int size, char *TX_Data);    // Writes multiple bytes of data
+void i2cMultipleRead(char address, int size, char *RX_Data);    // Reads multiple bytes of data
 
 
 #endif /* I2C_H_ */

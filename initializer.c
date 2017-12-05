@@ -120,17 +120,18 @@ void uartInit(void) {
 \************************/
 
 void i2cInit(void){
-    P3SEL0    |= BIT0       // SDA line for I2C using UCB0
-               + BIT1;      // SCL line for I2C using UCB0
-    P3SEL1    |= BIT0       // SDA line for I2C using UCB0
-               + BIT1;      // SCL line for I2C using UCB0
-    UCB0CTL1  |= UCSWRST;   // USCI held in reset for initialization
-    UCB0CTLW0  = UCMST      // Master Mode
-               + UCMODE_3   // I2C Mode
-               + UCSYNC;    // Synchronus Mode
-    UCB2BRW    = 0x0008;    // SMCLK/8
-    UCB2CTLW1 |= UCASTP_2;  // Sends stop bit when UCTBCNT is reached
-    UCB2CTL1  &= ~UCSWRST;  // Starts state machine
+    P1SEL0    |= BIT6       // SDA line for I2C using UCB0
+              |  BIT7;      // SCL line for I2C using UCB0
+    UCB0CTLW0 |= UCSWRST;   // Enters reset state, USCI stops operation
+    UCB0CTLW0 |= UCMST      // Master Mode
+              |  UCMODE_3   // I2C Mode
+              |  UCSYNC;    // Synchronus Mode
+    UCB0BRW    = 0x000A;    // SMCLK/10
+    UCB0CTLW1 |= UCASTP_2;  // Sends stop bit when UCTBCNT is reached
+    UCB0IE    |= UCRXIE     // Data receive interrupt enable
+              |  UCTXIE     // Data sent interrupt enable
+              |  UCNACKIE   // NACK interrupt enable
+              |  UCBCNTIE;  // Byte counter interrupt enable
 }
 
 

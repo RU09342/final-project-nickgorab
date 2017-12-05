@@ -1,0 +1,1 @@
+LiPo battery figure https://learn.sparkfun.com/tutorials/battery-technologies/lithium-polymer
