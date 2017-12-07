@@ -78,7 +78,7 @@ void dcoInit(void){
 *                        *
 \************************/
 
-void timerInit(void){
+void timerBInit(void){
     TB0CCTL0 = CCIE;        // Enables timer interrupts
     TB0CTL   = TBSSEL_1     // SMCLK
              + MC_1;        // Runs in up-mode
@@ -87,6 +87,22 @@ void timerInit(void){
     TB0CCTL3 = OUTMOD_7;    // Set/Reset Mode M2
     TB0CCTL4 = OUTMOD_7;    // Set/Reset Mode M1
     TB0CCR0  = 100;         // Counts up to 100
+}
+
+
+
+/************************\
+*                        *
+* TIMER_A Initialization *
+*                        *
+\************************/
+
+void timerAInit(void){
+    TA0CTL   = TASSEL_2   // SMCLK
+             + MC_2       // Up-Mode
+             + ID_3;      // Predivider 8
+    TA0CCTL1 = OUTMOD_3;  // Reset/Set behavior
+    TA0CCR1  = 32767;     // CCR1 value for 50% duty
 }
 
 
@@ -123,15 +139,16 @@ void i2cInit(void){
     P1SEL0    |= BIT6       // SDA line for I2C using UCB0
               |  BIT7;      // SCL line for I2C using UCB0
     UCB0CTLW0 |= UCSWRST;   // Enters reset state, USCI stops operation
+    UCB0TBCNT = 0x06;       // Expecting to receive 2 bytes of data
+    UCB0CTLW1 |= UCASTP_2;  // Sends stop bit when UCTBCNT is reached
     UCB0CTLW0 |= UCMST      // Master Mode
               |  UCMODE_3   // I2C Mode
-              |  UCSYNC;    // Synchronus Mode
+              |  UCSSEL_3;  // Sets SMCLK as source
     UCB0BRW    = 0x000A;    // SMCLK/10
-    UCB0CTLW1 |= UCASTP_2;  // Sends stop bit when UCTBCNT is reached
-    UCB0IE    |= UCRXIE     // Data receive interrupt enable
-              |  UCTXIE     // Data sent interrupt enable
-              |  UCNACKIE   // NACK interrupt enable
-              |  UCBCNTIE;  // Byte counter interrupt enable
+    UCB0CTLW0 &= ~UCSWRST;  // Exits reset mode, USCI enters operation
+    UCB0IE    |= UCTXIE0    // Data received interrupt enable
+              |  UCRXIE0    // Data ready to transmit interrupt enable
+              |  UCNACKIE;  // NACK interrupt enable
 }
 
 

@@ -20,6 +20,7 @@
 #define MAX_OUT 100         // Maximum PWM output
 #define MIN_OUT 2           // Minimum PWM output
 #define dt      0.000125    // Sampling time of ~100Hz
+
 int   roll,                 // Roll value
       pitch,                // Pitch Value
       height,               // Height value
@@ -34,7 +35,9 @@ int   roll,                 // Roll value
       pKd,                  // Pitch derivative constant
       hKp,                  // Height proportional constant
       hKi,                  // Height integral constant
-      hKd;                  // Height derivative constant
+      hKd,                  // Height derivative constant
+      battStat,             // Battery health variable
+      kill;                 // Kill switch variable
 float rP_error,             // Roll proportional error
       rI_error,             // Roll integral error
       rD_error,             // Roll derivative error
@@ -54,7 +57,6 @@ float rP_error,             // Roll proportional error
       p2pwm,                // Pitch control 2 PWM
       r1pwm,                // Roll control 1 PWM
       r2pwm;                // Roll control 2 PWM
-int   battStat = 0;         // Critical battery flag
 
 
 
@@ -66,24 +68,34 @@ int   battStat = 0;         // Critical battery flag
 
 void battCheck(void){
 
-    ADC12CTL0 |= ADC12ENC   // Enables ADC
-              |  ADC12SC;   // Takes a reading
-
-    if(ADC12MEM0 < 3723) {  // If battry voltage < 3.0 V
-        battStat = 1;       // Raises low batt flag
-    } else {
-        battStat = 0;       // Continue normal operation
+    ADC12CTL0 |= ADC12ENC                 // Enables ADC
+              |  ADC12SC;                 // Takes a reading
+        
+    if(ADC12MEM0 < 3723) {                // If battry voltage < 3.0 V
+        battStat = 1;                     // Raises low batt flag
+        if (ADC12MEM0 < 3455) {           // If battery voltage is < 2.7 V
+            battStat = 2;       
+    }   } else {                          // If battery voltage is nominal
+        battStat = 0;                     // Continue normal operation
     }
-
-    switch(battStat){
-        case 0:
-            P1OUT |=  BIT1; // Turns on the green LED
-            P1OUT &= ~BIT0; // Turns off the red LED
-        break;
-        case 1:
-            P1OUT |=  BIT0; // Turns on the red LED
-            P1OUT &= ~BIT1; // Turns off the green LED
-        break;
+          
+    switch(battStat){         
+        case 0:                           // Battery is good
+            TA0CTL |=  MC_0               // Stops timer
+                   |   TACLR;             // Clears timer
+            P1SEL0 &= ~BIT0;              // Sets P1.0 to GPIO output
+            P1OUT   =  BIT0;              // Turns the LED on 
+        break;                
+        case 1:                           // Low battery state
+            P1SEL0  = BIT0;               // Sets P1.0 to TA0.1 control
+            TA0CTL |= MC_2;               // Starts the clock in continous mode
+        break;          
+        case 2:                           // Critical battery state
+            TA0CTL |=  MC_0               // Stops timer
+                   |   TACLR;             // Clears timer
+            P1SEL0 &= ~BIT0;              // Sets P1.0 to GPIO output
+            P1OUT  &= ~BIT0;              // Turns off the LEDs
+            kill = 1;
 }   }
 
 
@@ -94,11 +106,10 @@ void battCheck(void){
 *                       *
 \***********************/
 
-void pidControl(int setPoint){
+void pidControl(int status){
 
     getHeight();                            // Updates current height value
-    getRoll();                              // Updates current roll value
-    getPitch();                             // Updates current pitch value
+    getAccel();                             // Updates current attitude data
 
     rP_error = roll   - setRoll;            // Calculates roll proportional error 
     pP_error = pitch  - setPitch;           // Calculates pitch proportional error 
@@ -128,43 +139,39 @@ void pidControl(int setPoint){
             + (iKd*iD_error)                // Adds derivative error
             + (iKi*iI_Error);               // Adds integral error
 
-    if(hOutput > MAX_OUT){                   // If height output is greater than max output
+    if(hOutput > MAX_OUT){                  // If height output is greater than max output
        hOutput = MAX_OUT;                   // Clamps output to max value
-    } else if(hOutput < MIN_OUT){            // If height output is less than minimum output
-        hOutput = MIN_OUT;                   // Clamps output to minimum value
+    } else if(hOutput < MIN_OUT){           // If height output is less than minimum output
+        hOutput = MIN_OUT;                  // Clamps output to minimum value
     }    
 
-    if(pOutput > MAX_OUT){                   // If pitch output is greater than max output
-        pOutput = MAX_OUT;                   // Clamps output to max value
-    } else if(pOutput < MIN_OUT){            // If pitch output is less than minimum output
-        pOutput = MIN_OUT;                   // Clamps output to minimum value
+    if(pOutput > MAX_OUT){                  // If pitch output is greater than max output
+        pOutput = MAX_OUT;                  // Clamps output to max value
+    } else if(pOutput < MIN_OUT){           // If pitch output is less than minimum output
+        pOutput = MIN_OUT;                  // Clamps output to minimum value
     }       
 
-    if(rOutput > MAX_OUT){                   // If roll output is greater than max output
-        rOutput = MAX_OUT;                   // Clamps output to max value
-    } else if(rOutput < MIN_OUT){            // If roll output is less than minimum output
-        rOutput = MIN_OUT;                   // Clamps output to minimum value
+    if(rOutput > MAX_OUT){                  // If roll output is greater than max output
+        rOutput = MAX_OUT;                  // Clamps output to max value
+    } else if(rOutput < MIN_OUT){           // If roll output is less than minimum output
+        rOutput = MIN_OUT;                  // Clamps output to minimum value
     }
 
-    if(rOutput > 0){                         // If there is a positive roll
-      r1pwm = hOutput + (rOutput/2);         // Adds half the PWM value to the height control
-      r2pwm = hOutput - (rOutput/2);         // Subtracts half PWM value from the height control
+    if(rOutput > 0){                        // If there is a positive roll
+      r1pwm = hOutput + (rOutput/2);        // Adds half the PWM value to the height control
+      r2pwm = hOutput - (rOutput/2);        // Subtracts half PWM value from the height control
     } else {
-      r1pwm = hOutput + (rOutput/2);         // Subtracts half PWM value from the height control
-      r2pwm = hOutput - (rOutput/2);         // Adds half the PWM value form the height control
+      r1pwm = hOutput + (rOutput/2);        // Subtracts half PWM value from the height control
+      r2pwm = hOutput - (rOutput/2);        // Adds half the PWM value form the height control
     }
 
-    if(pOutput > 0){                         // If there is a positive pitch
-      p1pwm = hOutput + (pOutput/2);         // Adds half the PWM value to the height control
-      p2pwm = hOutput - (pOutput/2);         // Subtracts half PWM value from the height control
+    if(pOutput > 0){                        // If there is a positive pitch
+      p1pwm = hOutput + (pOutput/2);        // Adds half the PWM value to the height control
+      p2pwm = hOutput - (pOutput/2);        // Subtracts half PWM value from the height control
     } else {                                 
-      p1pwm = hOutput - (pOutput/2);         // Subtracts half PWM value from the height control
-      p2pwm = hOutput + (pOutput/2);         // Adds half the PWM value form the height control
-    }        
-
-    
-
-}
+      p1pwm = hOutput - (pOutput/2);        // Subtracts half PWM value from the height control
+      p2pwm = hOutput + (pOutput/2);        // Adds half the PWM value form the height control
+}   }
 
 
 
@@ -175,17 +182,26 @@ void pidControl(int setPoint){
 \***********************/
 
 void main(void){
-    WDTCTL = WDTPW | WDTHOLD;   // Disables Watchdog Timer
-    PM5CTL0 &= ~LOCKLPM5;       // Disables high-impedance mode
-    adcInit();                  // Initializes the ADC
-    ledInit();                  // Initializes the LEDs
-    timerInit();
 
-    while(1){
-        battCheck();            // Continuously checks battery status
-        pidControl();           // Controls the motors through PID
+    WDTCTL = WDTPW | WDTHOLD;                     // Disables Watchdog Timer
+    PM5CTL0 &= ~LOCKLPM5;                         // Disables high-impedance mode
+    adcInit();                                    // Initializes the ADC
+    ledInit();                                    // Initializes the LEDs
+    timerAInit();                                 // Initializes TIMER_A module
+    timerBInit();                                 // Initializes TIMER_B module
+
+    while(~kill){                                 // Operates as long as kill flag isn't raised
+        battCheck();                              // Checks the health status of the battery
+        pidControl(battStat, height[2], accel[6]) // Begins the PID control sequence
     }
-}
+
+    if(kill){                                     // If the kill flag is raised
+        P1DIR &= ~BIT4;                           // Disables Motor 1
+        P1DIR &= ~BIT5;                           // Disables Motor 2
+        P4DIR &= ~BIT4;                           // Disables Motor 3
+        P4DIR &= ~BIT5;                           // Disables Motor 4
+        __bis_SR_register(LPM0_bits);             // Enters Low-Power mode and enables global interrupt
+}   }
 
 
 
@@ -235,4 +251,3 @@ __interrupt void USCI_A0_ISR(void) {    // Interrupt function decleration
     if(byte == 8){                      // If transmission is finished
         byte = 0;                       // Reset byte counter and wait for next transmission
 }   }
-

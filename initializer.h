@@ -20,7 +20,8 @@
 
 void adcInit();
 void ledInit();
-void timerInit();
+void timerAInit();
+void timerBInit();
 void i2cInit();
 void dcoInit();
 void vcnl4200Init();
