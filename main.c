@@ -10,7 +10,6 @@
 #include "system.h"
 
 
-
 /************************\
 *                        *
 *    Code Definitions    *
@@ -161,8 +160,8 @@ void pidControl(int status){
       r1pwm = hOutput + (rOutput/2);        // Adds half the PWM value to the height control
       r2pwm = hOutput - (rOutput/2);        // Subtracts half PWM value from the height control
     } else {
-      r1pwm = hOutput + (rOutput/2);        // Subtracts half PWM value from the height control
-      r2pwm = hOutput - (rOutput/2);        // Adds half the PWM value form the height control
+      r1pwm = hOutput - (rOutput/2);        // Subtracts half PWM value from the height control
+      r2pwm = hOutput + (rOutput/2);        // Adds half the PWM value form the height control
     }
 
     if(pOutput > 0){                        // If there is a positive pitch
@@ -189,10 +188,11 @@ void main(void){
     ledInit();                                    // Initializes the LEDs
     timerAInit();                                 // Initializes TIMER_A module
     timerBInit();                                 // Initializes TIMER_B module
+    i2cInit();
 
     while(~kill){                                 // Operates as long as kill flag isn't raised
         battCheck();                              // Checks the health status of the battery
-        pidControl(battStat, height[2], accel[6]) // Begins the PID control sequence
+//      pidControl(battStat) // Begins the PID control sequence
     }
 
     if(kill){                                     // If the kill flag is raised

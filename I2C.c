@@ -1,8 +1,15 @@
-
+/*
+ *            I2C.h
+ *
+ *   Created on:  November 7, 2017
+ *  Last Edited:  December 11, 2017
+ *       Author:  Nick Gorab
+ *        Board:  MSP430F5994
+ */
 
 
 #define VCNL4200_ADDRESS 0x50;  // Prox sensor address
-#define LSM6DSL_ADDRESS  %%%%;  // Accelerometer sensor address
+#define LSM6DSL_ADDRESS  0x6A; // Accelerometer sensor address
 
 int     RX_Byte_Ctr,            // Coutner to make sure all of the information is received
         TX_Byte_Ctr,            // Counter to make sure all of the information is sent
@@ -25,6 +32,9 @@ void getHeight(void){
     UCB0CTL1 &= ~UCTR;                      // Enters RX Mode
     UCB0CTL1 |= UCTXSTT;                    // Sends start condition
     __bis_SR_register(LPM0_bits | GIE);     // Enters Low-Power mode and enables global interrupt
+    i = 0;
+    RX_Byte_Ctr = 0;
+    TX_Byte_Ctr = 0;
 }
 
 
@@ -42,6 +52,9 @@ void getAccel(void){
     UCB0CTL1 &= ~UCTR;                      // Enters RX Mode
     UCB0CTL1 |= UCTXSTT;                    // Sends start condition
     __bis_SR_register(LPM0_bits | GIE);     // Enters Low-Power mode and enables global interrupt
+    i = 0;
+    RX_Byte_Ctr = 0;
+    TX_Byte_Ctr = 0;
 }
 
 
@@ -70,5 +83,9 @@ __interrupt void USCI_B0_ISR(void) {
             } else {                                        // If there is nothing left to say
                 __bic_SR_register_on_exit(LPM0_bits);       // Exits Low-Power mode
             }
+        break;
+
+        case USCI_I2C_UCBCNTIFG:                // Vector 26: BCNTIFG
+            __bic_SR_register_on_exit(LPM0_bits);
         break;
 }   }

@@ -46,7 +46,6 @@ void adcInit(void){
 
 void ledInit(void){
     P1DIR |= BIT0       // Red LED
-          |  BIT1;      // Green LED
 }
 
 
@@ -82,10 +81,10 @@ void timerBInit(void){
     TB0CCTL0 = CCIE;        // Enables timer interrupts
     TB0CTL   = TBSSEL_1     // SMCLK
              + MC_1;        // Runs in up-mode
-    TB0CCTL1 = OUTMOD_7;    // Set/Reset Mode M4
-    TB0CCTL2 = OUTMOD_7;    // Set/Reset Mode M3
-    TB0CCTL3 = OUTMOD_7;    // Set/Reset Mode M2
-    TB0CCTL4 = OUTMOD_7;    // Set/Reset Mode M1
+    TB0CCTL1 = OUTMOD_7;    // Set/Reset Mode M1
+    TB0CCTL2 = OUTMOD_7;    // Set/Reset Mode M2
+    TB0CCTL3 = OUTMOD_7;    // Set/Reset Mode M3
+    TB0CCTL4 = OUTMOD_7;    // Set/Reset Mode M4
     TB0CCR0  = 100;         // Counts up to 100
 }
 

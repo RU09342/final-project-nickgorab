@@ -8,6 +8,73 @@
 \newcolumntype{C}{>{\centering}p}
 
 
+\usepackage{tikz}
+
+\newcounter{wavenum}
+
+\setlength{\unitlength}{1cm}
+
+\newcommand*{\clki}{
+	\draw (t_cur) -- ++(0,.3) -- ++(.5,0) -- ++(0,-.6) -- ++(.5,0) -- ++(0,.3)
+	node[time] (t_cur) {};
+}
+
+\newcommand*{\bitvector}[3]{
+	\draw[fill=#3] (t_cur) -- ++( .1, .3) -- ++(#2-.2,0) -- ++(.1, -.3)
+	-- ++(-.1,-.3) -- ++(.2-#2,0) -- cycle;
+	\path (t_cur) -- node[anchor=mid] {#1} ++(#2,0) node[time] (t_cur) {};
+}
+
+\newcommand*{\known}[2]{
+	\bitvector{#1}{#2}{white}
+}
+
+\newcommand*{\unknown}[2][XXX]{
+	\bitvector{#1}{#2}{black!20}
+}
+
+\newcommand*{\bit}[2]{
+	\draw (t_cur) -- ++(0,.6*#1-.3) -- ++(#2,0) -- ++(0,.3-.6*#1)
+	node[time] (t_cur) {};
+}
+
+\newcommand*{\unknownbit}[1]{
+	\draw[ultra thick,black!50] (t_cur) -- ++(#1,0) node[time] (t_cur) {};
+}
+
+\newcommand{\nextwave}[1]{
+	\path (0,\value{wavenum}) node[left] {#1} node[time] (t_cur) {};
+	\addtocounter{wavenum}{-1}
+}
+
+\newcommand{\clk}[2]{
+	\nextwave{#1}
+	\FPeval{\res}{(\wavewidth+1)/#2}
+	\FPeval{\reshalf}{#2/2}
+	\foreach \t in {1,2,...,\res}{
+		\bit{\reshalf}{1}
+		\bit{\reshalf}{0}
+	}
+}
+
+\newenvironment{wave}[3][clk]{
+	\begin{tikzpicture}[draw=black, yscale=.7,xscale=1]
+	\tikzstyle{time}=[coordinate]
+	\setlength{\unitlength}{1cm}
+	\def\wavewidth{#3}
+	\setcounter{wavenum}{0}
+	\nextwave{#1}
+	\foreach \t in {0,1,...,\wavewidth}{
+		\draw[dotted] (t_cur) +(0,.5) node[above] {t=\t} -- ++(0,.4-#2);
+		\clki
+	}
+}{\end{tikzpicture}}
+
+\usepackage{verbatim}
+
+
+
+
 \author{Nick Gorab}
 \title{CodQuaptor}
 
@@ -43,6 +110,11 @@
 	Indication lighting is used in order to give notice of when the battery reaches a critical level. When operating in the nominal range, the lights will remain constantly on. When the low battery threshold is reached the lights will begin to flash, indicating the user the battery is low. When approaching the critical voltage level, the lights will blink rapidly preceding the shutdown of the device. 
 	\subsubsection{$I^{2}C$ Communication}
 	In order to gather data pertaining to the position of the device, a distance sensor and accelerometer were used in conjunction to determine attitude. Both of these devices use $I^{2}C$ Communication to send and recieve data. 
+	
+\begin{wave}{3}{6}
+	\nextwave{getHeight} \unknown[S]{.125} \known{addr}{1} \unknown{4.5}
+\end{wave}
+
 	\paragraph{VCNL4200}
 	\paragraph{LSM6DSL}
 	\subsubsection{PID Control}
