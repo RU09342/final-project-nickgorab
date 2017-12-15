@@ -13,7 +13,7 @@
 
 #include <msp430.h>
 
-void getHeight(void);
+
 void getAccel(void);
 
 

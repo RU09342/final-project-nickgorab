@@ -45,7 +45,7 @@ void adcInit(void){
 \************************/
 
 void ledInit(void){
-    P1DIR |= BIT0       // Red LED
+    P1DIR |= BIT0;       // Red LED
 }
 
 
@@ -66,7 +66,7 @@ void dcoInit(void){
   CSCTL3   = DIVA__1        // ACLK source divider of 2
            | DIVS__1        // SMCLK source divider of 2
            | DIVM__1;       // MCLK source divider of 2
-  CSCTL0_H = 0;             // Locks clock registers 
+  CSCTL0_H = 0;             // Locks clock registers
 }
 
 
@@ -78,7 +78,6 @@ void dcoInit(void){
 \************************/
 
 void timerBInit(void){
-    TB0CCTL0 = CCIE;        // Enables timer interrupts
     TB0CTL   = TBSSEL_1     // SMCLK
              + MC_1;        // Runs in up-mode
     TB0CCTL1 = OUTMOD_7;    // Set/Reset Mode M1
@@ -135,41 +134,15 @@ void uartInit(void) {
 \************************/
 
 void i2cInit(void){
-    P1SEL0    |= BIT6       // SDA line for I2C using UCB0
-              |  BIT7;      // SCL line for I2C using UCB0
-    UCB0CTLW0 |= UCSWRST;   // Enters reset state, USCI stops operation
-    UCB0TBCNT = 0x06;       // Expecting to receive 2 bytes of data
-    UCB0CTLW1 |= UCASTP_2;  // Sends stop bit when UCTBCNT is reached
-    UCB0CTLW0 |= UCMST      // Master Mode
-              |  UCMODE_3   // I2C Mode
-              |  UCSSEL_3;  // Sets SMCLK as source
-    UCB0BRW    = 0x000A;    // SMCLK/10
-    UCB0CTLW0 &= ~UCSWRST;  // Exits reset mode, USCI enters operation
-    UCB0IE    |= UCTXIE0    // Data received interrupt enable
-              |  UCRXIE0    // Data ready to transmit interrupt enable
-              |  UCNACKIE;  // NACK interrupt enable
-}
-
-
-
-/*****************************\
-*                             *
-*   VCNL4200 Initialization   *
-*                             *
-\*****************************/
-
-void vcnl4200Init(void){
-
-}
-
-
-
-/****************************\
-*                            *
-*   LSM6DSL Initialization   *
-*                            *
-\****************************/
-
-void lsm6dslInit(void){
-
+    P1SEL0    |= BIT6           // SDA line for I2C using UCB0
+              |  BIT7;          // SCL line for I2C using UCB0
+    UCB0CTLW0 |= UCSWRST;       // Enters reset state, USCI stops operation
+    UCB0CTLW1 |= UCASTP_2;      // Sends stop bit when UCTBCNT is reached
+    UCB0CTLW0 |= UCMST          // Master Mode
+              |  UCMODE_3       // I2C Mode
+              |  UCSSEL__SMCLK; // Synchronous Mode
+    UCB0BRW    = 0x000A;        // SMCLK/10
+    UCB0CTLW0 &= ~UCSWRST;      // Exits reset mode, USCI enters operation
+    UCB0IE    |= UCTXIE0        // Data received interrupt enable
+              |  UCRXIE0;       // Data ready to transmit interrupt enable
 }
