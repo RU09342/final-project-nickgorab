@@ -1,6 +1,4 @@
-<<<<<<< HEAD
-theme: jekyll-theme-minimal
-show_downloads: true
-=======
 theme: jekyll-theme-slate
->>>>>>> fdf5fde51b43e802dd09949801522c7698b82e7a
+title: Welcome to the CodQuaptor GitHub Repo!
+decription: This is a page dedicated to Nick Gorab's Intro to Embedded Systems final project.
+show_downloads: true
