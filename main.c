@@ -98,6 +98,13 @@ void battCheck(void){
 }   }
 
 
+
+/***********************\
+*                       *
+* Initializes variables *
+*                       *
+\***********************/
+
 void definer(void){
     rKp = 0;        // Initialized constants to zero
     rKi = 0;        // Initialized constants to zero
@@ -109,8 +116,10 @@ void definer(void){
     hKi = 0;        // Initialized constants to zero
     hKd = 0;        // Initialized constants to zero
 
-
 }
+
+
+
 /***********************\
 *                       *
 *      PID Control      *
