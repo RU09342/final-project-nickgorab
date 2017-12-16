@@ -109,11 +109,8 @@
 	\subsubsection{Indication Lighting}
 	Indication lighting is used in order to give notice of when the battery reaches a critical level. When operating in the nominal range, the lights will remain constantly on. When the low battery threshold is reached the lights will begin to flash, indicating the user the battery is low. When approaching the critical voltage level, the lights will blink rapidly preceding the shutdown of the device. 
 	\subsubsection{$I^{2}C$ Communication}
-	In order to gather data pertaining to the position of the device, a distance sensor and accelerometer were used in conjunction to determine attitude. Both of these devices use $I^{2}C$ Communication to send and recieve data. 
+	In order to gather data pertaining to the position of the device, a distance sensor and accelerometer were used in conjunction to determine attitude. Both of these devices use $I^{2}C$ Communication to send and receive data. 
 	
-\begin{wave}{3}{6}
-	\nextwave{getHeight} \unknown[S]{.125} \known{addr}{1} \unknown{4.5}
-\end{wave}
 
 	\paragraph{VCNL4200}
 	\paragraph{LSM6DSL}
@@ -141,6 +138,44 @@
 9 Bytes of data are used in order to update all 3 constants for the three PID controllers. 
 
 	\subsection{Hardware}
+	
+\subsubsection{Pinouts}
+
+\begin{table}[htp]
+	\caption{Recommended Operating Voltages}    
+	\centering
+	\begin{center}
+		\begin{tabular}{p{1.25in}dd}
+			\toprule
+			\multicolumn{1}{C{1.25in}}{Pin Number} & \multicolumn{1}{C{1.25in}}{Pin Name} & \multicolumn{1}{C{1.25in}}{Description}\\
+			\midrule
+			1 	& 	GPIO	&	LEDs		\\
+			2 	& 	GPIO	&	ADC			\\
+			10 	& 	TB0.1	&	PWM			\\
+			11 	& 	TB0.2	&	PWM			\\
+			22 	& 	Test	&	Programming	\\
+			23 	& 	Reset	&	Programming	\\
+			24 	& 	UCA0TXD	&	UART		\\
+			25 	&	UCA0RXD	&	UART		\\
+			27 	&	TB0.3	&	PWM			\\
+			28 	&	TB0.4	&	PWM			\\
+			31 	&	UCB0SDA	&	I2C			\\
+			32 	&	UCB0SCL	&	I2C			\\
+			36 	&	DVSS1	&	Power		\\
+			37 	&	DVCC1	&	Power		\\
+			41 	&	AVSS3	&	Power		\\
+			44 	&	AVSS2	&	Power		\\
+			47 	&	AVSS1	&	Power		\\
+			48 	&	AVCC1	&	Power		\\
+			\bottomrule
+		\end{tabular}
+	\end{center}
+	\label{OpVoltage}
+\end{table}
+
+
+
+
 	\subsubsection{Voltage Regulation}
 The LiPo battery source operates at an optimal 3.7V, meaning that it needs to be regulated before it is introduced to the MSP430FR5994 micro controller. Table \ref{OpVoltage}, found below, shows the recommended operating voltages of the major components used in the design. \\
 
@@ -162,7 +197,7 @@ The LiPo battery source operates at an optimal 3.7V, meaning that it needs to be
 \end{table}
 
 The recommended maximum value is below the operating point of the battery, so the voltage needs to be stepped down for use. \\
-This was originally planned to be done through a voltage regulator, however the dropoff voltages are too large to provide an adequate and stable output. 
+This was originally planned to be done through a voltage regulator, however the drop-off voltages are too large to provide an adequate and stable output. Instead, the
 
 
 	\subsubsection{High-Side Switching PWM Control}

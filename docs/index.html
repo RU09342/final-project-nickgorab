@@ -35,7 +35,7 @@
 								<li><a href="#work">Software</a></li>
 								<li><a href="#about">Hardware</a></li>
 								<li><a href="#contact">Contact</a></li>
-								<li><a href="#elements">Elements</a></li>
+								<li><a href="#elements">Menus</a></li>
 							</ul>
 						</nav>
 					</header>
@@ -47,8 +47,8 @@
 							<article id="intro">
 								<h2 class="major">Overview</h2>
 								<span class="image main"><img src="images/pic01.jpg" alt="" /></span>
-								<p>The purpose of this project is to create a quadcopter from the ground up using the techniques which were taught in Introduction to Embedded Systems. This includes writing software, hardware, and PCB desin. By the way, check out my <a href="#work">awesome work</a>.</p>
-								<p>The CodQuaptor has the ability to maintain steady flight at a prescribed altitude and will constantly adjust its attitude to make up for any chagnes in it's surroindings. This is all done through error correction at the hands of the CodQuaptor's 3 PID Controllers. The motors are controlled by PWM and the accelerometer and height information are relayed to the microcontroller through I2C Channels. </p>
+								<p>The purpose of this project is to create a quadcopter from the ground up using the techniques which were taught in Introduction to Embedded Systems. This includes writing software, hardware, and PCB design. 
+								<p>The CodQuaptor has the ability to maintain steady flight at a prescribed altitude and will constantly adjust its attitude to make up for any chagnes in it's surroindings. This is all done through error correction at the hands of the CodQuaptor's 3 PID Controllers. Data is sent to the quadcopter through an accelerometer and proximity sensor. The motors are controlled by PWM and the accelerometer and height information are relayed to the microcontroller through I2C Channels. Additionally, there is battery protection software in which the microcontroller will poll the status of the battery and will alter the performance of the system based on the available voltage.</p>
 							</article>
 
 						<!-- Work -->
@@ -64,6 +64,33 @@
 								<h2 class="major">Hardware</h2>
 								<span class="image main"><img src="images/pic03.jpg" alt="" /></span>
 								<p>Lorem ipsum dolor sit amet, consectetur et adipiscing elit. Praesent eleifend dignissim arcu, at eleifend sapien imperdiet ac. Aliquam erat volutpat. Praesent urna nisi, fringila lorem et vehicula lacinia quam. Integer sollicitudin mauris nec lorem luctus ultrices. Aliquam libero et malesuada fames ac ante ipsum primis in faucibus. Cras viverra ligula sit amet ex mollis mattis lorem ipsum dolor sit amet.</p>
+
+								<h4>Features</h4>
+									<ul>
+										<li>Low-Side Cwtich PWM-based Motor Control.</li>
+										<li>Voltage regulation.</li>
+										<li>Easy-Access I2C Viewing Header.</li>
+										<li>UART Connection.</li>
+										<li>Detachable Voltage Regulator.</li>
+										<li>Programming Header.</li>
+									</ul>
+
+
+									
+										<h4> Low-Side Switch PWM-based motor control</h4>
+											<p> In order to control the propeller speed, PWM was used to control the motors. This required the used of a MOSFET switch to supply the motors with an adequate amount of current. One design choice which needed to be made here was whether to use a high-side switching architecture or low-side. High-side switching was the final decision, to avoid running extraneous traces through the legs of the PCB board. 
+										<h4> Voltage Regulation</h4>
+											<p> The final design is powered off of a 3.7 V LiPo battery. The optimal voltage for most of the IC components used in this design run optimally on 3.3 V, so voltage regulation needed to be implemented. Additionally, voltage regulation protects the circit from any spikes in voltage which may in turn damage the components. </p>
+										<h4> Easy-Access I2C Viewing Header</h4>
+											<p> For prototyping purposes, there are headers connected directly to the I2C lines of the board, which allow an outside user to tap into the line to see just what is being sent. This was done to ensure that the devices are talking to each other correctly and to provide as a good platform for debugging incase something goes wrong. </p>
+										<h4> UART Connection</h4>
+											<p> In order to tune the PID controllers of CodQuaptor, there are exposed UART channels on the board which provide a simple means of tuning the device. In order to control the PID Controller, 9 bytes of data are sent to the board which determine the constants for each of the controllers. The microcontroller will respond with an acknowledge byte when all of the data is recieved. </p>
+										<h4> Detachable Voltage Regulator</h4>
+											<p> Incase there is an issue with the voltage regulator, or the device needs to be powered from a separate source other than the battery, there are pins available which bypass the voltage regulating circuitry. This will allow for reliable debugging without having to rely on the battery to supply adequate voltage. </p>
+										<h4> Programmable Header</h4>
+											<p> In order to program the microcontroller, there needs to be a spy-bi wire interface on the PCB board. This is done in the form of a header which have traces for a 3.3V line, Ground, Test, and Reset. This allows for the chip to be programmed straight from the launchpad chip.</p>
+
+
 							</article>
 
 						<!-- Contact -->

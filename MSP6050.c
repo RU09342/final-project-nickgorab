@@ -26,7 +26,7 @@ char    accelData[6],                   // Creates an array to store acceleromet
 *                                   *
 \***********************************/
 
-void getAccel(){
+char getAccel(void){
     txPtr = &txData[2];                     // Points to the third value of the txData array
     RX_Byte_Ctr = 6;                        // Sets the amount of bytes to be sent
     TX_Byte_Ctr = 1;                        // Sets the amount of bytes to send
@@ -41,6 +41,7 @@ void getAccel(){
     UCB0CTL1 &= ~UCTR;                      // Enters RX Mode
     UCB0CTL1 |= UCTXSTT;                    // Sends start condition
     __bis_SR_register(LPM0_bits | GIE);     // Enters Low-Power mode and enables global interrupt
+    return accelData[6];                    // Returns the accelerometer data for use in the main code
 }
 
 
