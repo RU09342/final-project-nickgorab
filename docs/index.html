@@ -34,8 +34,7 @@
 								<li><a href="#intro">Overview</a></li>
 								<li><a href="#work">Software</a></li>
 								<li><a href="#about">Hardware</a></li>
-								<li><a href="#contact">Contact</a></li>
-								<li><a href="#elements">Menus</a></li>
+								<li><a href="#technical">Technical</a></li>
 							</ul>
 						</nav>
 					</header>
@@ -55,8 +54,17 @@
 							<article id="work">
 								<h2 class="major">Software</h2>
 								<span class="image main"><img src="images/pic02.jpg" alt="" /></span>
-								<p>Adipiscing magna sed dolor elit. Praesent eleifend dignissim arcu, at eleifend sapien imperdiet ac. Aliquam erat volutpat. Praesent urna nisi, fringila lorem et vehicula lacinia quam. Integer sollicitudin mauris nec lorem luctus ultrices.</p>
-								<p>Nullam et orci eu lorem consequat tincidunt vivamus et sagittis libero. Mauris aliquet magna magna sed nunc rhoncus pharetra. Pellentesque condimentum sem. In efficitur ligula tate urna. Maecenas laoreet massa vel lacinia pellentesque lorem ipsum dolor. Nullam et orci eu lorem consequat tincidunt. Vivamus et sagittis libero. Mauris aliquet magna magna sed nunc rhoncus amet feugiat tempus.</p>
+								<p>The software is where most of the work for this project went. It inludes all of the functions necessary for operation with additional saftey features.</p>
+
+								<h4>Features</h4>
+									<ul>
+										<li>PID Controllers</li>
+											<p>The main part of the controlling algorithm in CodQuaptor are the three implemented PID Controllers. The three controllers represent the height, roll, and pitch of the device. When the error is determined from these controllers the value is normalized for use with the motors.</p>
+										<li>Battery Health Checks</li>
+											<p>To prevent damage to the device and the on-board battery, there are constant battery checks occuring inside of the main function. This uses a wire attached from the MSP430FR5994's ADC to the battery to determine it's current voltage. There are three states of battery health: Optimal, Low, and Critical. When the device is in an optimal battery state, it functions normally. When the low battery state is entered, the device will decrease the power sent to the motors which will <i>hopefully</i> lead to a successfull landing. As soon as the device enters a critical battery state, the motors and LEDs are all disables, and the MSP430 enters a low power mode until the device is reset.
+										<li>Status LED Control</li>
+										<li>Serial Communication</li>
+										
 							</article>
 
 						<!-- About -->
@@ -89,7 +97,12 @@
 											<p> Incase there is an issue with the voltage regulator, or the device needs to be powered from a separate source other than the battery, there are pins available which bypass the voltage regulating circuitry. This will allow for reliable debugging without having to rely on the battery to supply adequate voltage. </p>
 										<h4> Programmable Header</h4>
 											<p> In order to program the microcontroller, there needs to be a spy-bi wire interface on the PCB board. This is done in the form of a header which have traces for a 3.3V line, Ground, Test, and Reset. This allows for the chip to be programmed straight from the launchpad chip.</p>
+							</article>
 
+							<article id="technical">
+								<h2 class="major">Technical Info</h2>
+								<span class="image main"><img src="images/pic03.jpg" alt="" /></span>
+								
 
 							</article>
 
@@ -118,7 +131,7 @@
 									<li><a href="#" class="icon fa-twitter"><span class="label">Twitter</span></a></li>
 									<li><a href="#" class="icon fa-facebook"><span class="label">Facebook</span></a></li>
 									<li><a href="#" class="icon fa-instagram"><span class="label">Instagram</span></a></li>
-									<li><a href="#" class="icon fa-github"><span class="label">GitHub</span></a></li>
+									<li><a href="www.google.com" class="icon fa-github"><span class="label">GitHub</span></a></li>
 								</ul>
 							</article>
 
