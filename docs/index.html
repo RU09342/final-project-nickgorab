@@ -35,6 +35,7 @@
 								<li><a href="#work">Software</a></li>
 								<li><a href="#about">Hardware</a></li>
 								<li><a href="#technical">Technical</a></li>
+							
 							</ul>
 						</nav>
 					</header>
@@ -54,26 +55,51 @@
 							<article id="work">
 								<h2 class="major">Software</h2>
 								<span class="image main"><img src="images/pic02.jpg" alt="" /></span>
-								<p>The software is where most of the work for this project went. It inludes all of the functions necessary for operation with additional saftey features.</p>
+								<p>The software is where most of the work for this project went. It inludes all of the functions necessary for operation with additional saftey features. This is mainly the ability to take in data from the sensor and alter it until it is a useable PWM signal for each of the motors.</p>
 
 								<h4>Features</h4>
-									<ul>
-										<li>PID Controllers</li>
+								<section>
+										<ul>
+											<li>PID Controllers</li>
+											<li>Motor Control Algorithm</li>
+											<li>Battery Health Checks</li>	
+											<li>Status LED Control</li>
+											<li>Serial Communication</li>
+										</ul>
+										<hr />
+											
+										<h4>PID Controllers</h4>
 											<p>The main part of the controlling algorithm in CodQuaptor are the three implemented PID Controllers. The three controllers represent the height, roll, and pitch of the device. When the error is determined from these controllers the value is normalized for use with the motors.</p>
-										<li>Battery Health Checks</li>
-											<p>To prevent damage to the device and the on-board battery, there are constant battery checks occuring inside of the main function. This uses a wire attached from the MSP430FR5994's ADC to the battery to determine it's current voltage. There are three states of battery health: Optimal, Low, and Critical. When the device is in an optimal battery state, it functions normally. When the low battery state is entered, the device will decrease the power sent to the motors which will <i>hopefully</i> lead to a successfull landing. As soon as the device enters a critical battery state, the motors and LEDs are all disables, and the MSP430 enters a low power mode until the device is reset.
-										<li>Status LED Control</li>
-										<li>Serial Communication</li>
-										
+										<h4>Motor Control Algorithm</h4>
+											<p>In order for the PID controller data to be used to control the motors, they were sent through an algorithm which generated the correct PWM signal for each motor. In order to generate the final result, the roll and pitch value was divided in half and then added or subtracted to the height value, depending on the position of the motor. In order to prevent any kind of positive feedback loops in the motor control the roll and pitch number was added to one side, and then subtracted from the other. This will balance the device and prevent the motors from maxing themselves out.</p>
+										<h4>Battery Health Checks</h4>
+											<p>To prevent damage to the device and the on-board battery, there are constant battery checks occuring inside of the main function. This uses a wire attached from the MSP430FR5994's ADC to the battery to determine it's current voltage. There are three states of battery health: Optimal, Low, and Critical. When the device is in an optimal battery state, it functions normally. When the low battery state is entered, the device will decrease the power sent to the motors which will <i>hopefully</i> lead to a successfull landing. As soon as the device enters a critical battery state, the motors and LEDs are all disables, and the MSP430 enters a low power mode until the device is reset.</p>
+											<ul>
+												<li>Optimal &emsp; > 3.0 V</li>
+												<li>Low&emsp;&emsp;&emsp;2.9 V - 2.7 V</li>
+												<li>Critical&emsp;&emsp;< 2.7 V</li>
+											</ul>
+										<h4>Status LED Control</h4>
+											<p>In order to indicate the status of the battery to the user, there is an LED placed on each of the arms of Codquaptor which display the battery health. In an optimal voltage state, the lights remain in a constant on state. When a low-power state is entered, the lights will begin to flash with a 50% duty cycle. Once the critical battery plane is entered the lights will shut off along with the motors.</p>
+											
+										<h4>Serial Communications</h4>
+											<p>I2C and UART are both implemented into the software to allow for simple communication with all of the ICs on board. I2C is used between the MSP430, the proximity sensor, and the accelerometer. UART is used to talk to the MSP430 chip from a computer. </p>
+									</section>
+									<section>
+										<h4>Operation Block Diagram</h4>
+										<span class="image main"><img src="images/FBD.jpg" alt="" /></span>
+									</section>
+
 							</article>
 
 						<!-- About -->
 							<article id="about">
 								<h2 class="major">Hardware</h2>
 								<span class="image main"><img src="images/pic03.jpg" alt="" /></span>
-								<p>Lorem ipsum dolor sit amet, consectetur et adipiscing elit. Praesent eleifend dignissim arcu, at eleifend sapien imperdiet ac. Aliquam erat volutpat. Praesent urna nisi, fringila lorem et vehicula lacinia quam. Integer sollicitudin mauris nec lorem luctus ultrices. Aliquam libero et malesuada fames ac ante ipsum primis in faucibus. Cras viverra ligula sit amet ex mollis mattis lorem ipsum dolor sit amet.</p>
+								<p>The hardware for this design needed to account for all of the necessary components for a quadcopter. Things like noise reduction and ground plane separation went into account when designing the circuit board. The board was designed in such a way where the motors can mount directly to the PCB, which eliminates the need for an external frame.</p>
 
 								<h4>Features</h4>
+								<section>
 									<ul>
 										<li>Low-Side Cwtich PWM-based Motor Control.</li>
 										<li>Voltage regulation.</li>
@@ -81,8 +107,9 @@
 										<li>UART Connection.</li>
 										<li>Detachable Voltage Regulator.</li>
 										<li>Programming Header.</li>
+										<li>Motor Mouting Holes.</li>
 									</ul>
-
+									<hr />
 
 									
 										<h4> Low-Side Switch PWM-based motor control</h4>
@@ -97,12 +124,105 @@
 											<p> Incase there is an issue with the voltage regulator, or the device needs to be powered from a separate source other than the battery, there are pins available which bypass the voltage regulating circuitry. This will allow for reliable debugging without having to rely on the battery to supply adequate voltage. </p>
 										<h4> Programmable Header</h4>
 											<p> In order to program the microcontroller, there needs to be a spy-bi wire interface on the PCB board. This is done in the form of a header which have traces for a 3.3V line, Ground, Test, and Reset. This allows for the chip to be programmed straight from the launchpad chip.</p>
+										<h4>Motor Mounting Holes</h4>
+											<p>To remove the need for an external frame around CodQuaptor, the PCB board was designed with holes availble to mount the motors. In order to reduce any kind of yaw applied to the device while it is in operation, the motors are installed in a specific fashion to reduce any angular force. This is done by altering the direction of each motor. The pitch of the props need to be changed aswell, but over this is a simple solution to removing any kind of yaw force.</p>
+								</section>
+								<hr />
+								<section>
+									<h4>PCB Schematic</h4>
+									<span class="image main"><img src="images/Schematic.jpg" alt="" /></span>
+								</section>
 							</article>
 
 							<article id="technical">
+							<section>
 								<h2 class="major">Technical Info</h2>
 								<span class="image main"><img src="images/pic03.jpg" alt="" /></span>
-								
+								<h4>Helpful Links</h4>
+								<ul>
+									<li><a href="https://github.com/RU09342/final-project-nickgorab/" class="icon fa-github">   Github Repository</a></li>
+ 									<li><a href="https://docs.google.com/spreadsheets/d/1RWQ9sUYfzFUTsdUgAO9TKXSEL8l00dQJmWscWMPeLBA/edit?usp=sharing" class="icon fa-table"> Bill of Materials</a></li>
+								</ul>
+								<hr />
+							</section>
+
+							<section>
+									<div class="table-wrapper">
+										<h4>Pin Assignments</h4>
+										<table>
+											<thead>
+												<tr>
+													<th>Number</th>
+													<th>Name</th>
+													<th>Purpose</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>1</td>
+													<td>P1.0</td>
+													<td>GPIO (LED)</td>
+												</tr>
+												<tr>
+													<td>2</td>
+													<td>P1.1</td>
+													<td>GPIO (ADC)</td>
+												</tr>
+												<tr>
+													<td>10</td>
+													<td>P1.4</td>
+													<td>TB0.1</td>
+												</tr>
+												<tr>
+													<td>11</td>
+													<td>P1.5</td>
+													<td>TB0.2</td>
+												</tr>
+												<tr>
+													<td>22</td>
+													<td>TEST</td>
+													<td>TEST</td>
+												</tr>
+												<tr>
+													<td>23</td>
+													<td>RESET</td>
+													<td>RESET</td>
+												</tr>
+												<tr>
+													<td>24</td>
+													<td>P2.0</td>
+													<td>UCA0TXD</td>
+												</tr>
+												<tr>
+													<td>25</td>
+													<td>P2.1</td>
+													<td>UCA0RXD</td>
+												</tr>
+												<tr>
+													<td>27</td>
+													<td>P3.4</td>
+													<td>TB0.4</td>
+												</tr>
+												<tr>
+													<td>28</td>
+													<td>P3.5</td>
+													<td>TB0.3</td>
+												</tr>
+												<tr>
+													<td>31</td>
+													<td>P1.6</td>
+													<td>UCB0SDA</td>
+												</tr>
+												<tr>
+													<td>32</td>
+													<td>P1.7</td>
+													<td>UCB0SCL</td>
+												</tr>
+										</table>
+									</div>
+							</section>
+							
+
 
 							</article>
 
@@ -128,7 +248,7 @@
 									</ul>
 								</form>
 								<ul class="icons">
-									<li><a href="#" class="icon fa-twitter"><span class="label">Twitter</span></a></li>
+									<li><a href="http://www.google.com/" class="icon fa-twitter"><span class="label">Twitter</span></a></li>
 									<li><a href="#" class="icon fa-facebook"><span class="label">Facebook</span></a></li>
 									<li><a href="#" class="icon fa-instagram"><span class="label">Instagram</span></a></li>
 									<li><a href="www.google.com" class="icon fa-github"><span class="label">GitHub</span></a></li>
