@@ -64,6 +64,7 @@
 											<li>Motor Control Algorithm</li>
 											<li>Battery Health Checks</li>	
 											<li>Status LED Control</li>
+											<li>Error Handling</li>
 											<li>Serial Communication</li>
 										</ul>
 										<hr />
@@ -79,12 +80,16 @@
 												<li>Low&emsp;&emsp;&emsp;2.9 V - 2.7 V</li>
 												<li>Critical&emsp;&emsp;< 2.7 V</li>
 											</ul>
+										<h4>Error Handeling</h4>
+											<p>To prevent any I2C errors from crippling the function of the device, whenever a NACK is received from the slave device, the master will resend a start condition to reestablish the I2C Communication.</p>
 										<h4>Status LED Control</h4>
 											<p>In order to indicate the status of the battery to the user, there is an LED placed on each of the arms of Codquaptor which display the battery health. In an optimal voltage state, the lights remain in a constant on state. When a low-power state is entered, the lights will begin to flash with a 50% duty cycle. Once the critical battery plane is entered the lights will shut off along with the motors.</p>
 											
 										<h4>Serial Communications</h4>
-											<p>I2C and UART are both implemented into the software to allow for simple communication with all of the ICs on board. I2C is used between the MSP430, the proximity sensor, and the accelerometer. UART is used to talk to the MSP430 chip from a computer. </p>
+											<p>I2C and UART are both implemented into the software to allow for simple communication with all of the ICs on board. I2C is used between the MSP430, the proximity sensor, and the accelerometer. UART is used to talk to the MSP430 chip from a computer. Below is an example data read from the accelerometer showing how the data will be displayed to the processor. First, the master enters write mode and sends the address it wants to read from. The next 6 received bytes are the X, Y, Z values with the most significant byte sent first. </p>
+											<span class="image main"><img src="images/i2c.jpg" alt="" /></span>
 									</section>
+									<hr />
 									<section>
 										<h4>Operation Block Diagram</h4>
 										<span class="image main"><img src="images/FBD.jpg" alt="" /></span>
@@ -107,7 +112,7 @@
 										<li>UART Connection.</li>
 										<li>Detachable Voltage Regulator.</li>
 										<li>Programming Header.</li>
-										<li>Motor Mouting Holes.</li>
+										<li>Motor Mounting Holes.</li>
 									</ul>
 									<hr />
 
@@ -137,7 +142,7 @@
 							<article id="technical">
 							<section>
 								<h2 class="major">Technical Info</h2>
-								<span class="image main"><img src="images/pic03.jpg" alt="" /></span>
+								<span class="image main"><img src="images/pcb.jpg" alt="" /></span>
 								<h4>Helpful Links</h4>
 								<ul>
 									<li><a href="https://github.com/RU09342/final-project-nickgorab/" class="icon fa-github">   Github Repository</a></li>
